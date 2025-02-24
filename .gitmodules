@@ -3,4 +3,5 @@
 	url = https://github.com/DMTF/libspdm
 [submodule "SPDM-Responder-Validator"]
 	path = SPDM-Responder-Validator
-	url = https://github.com/DMTF/SPDM-Responder-Validator
+	url = https://github.com/parvathib/SPDM-Responder-Validator.git
+	branch = pbhogaraju/custom-cmd-check
