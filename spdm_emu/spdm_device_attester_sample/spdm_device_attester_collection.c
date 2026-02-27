@@ -68,9 +68,10 @@ spdm_device_evidence_collection (void *spdm_context)
         libspdm_zero_mem (cert_chain.cert_chain, sizeof(cert_chain.cert_chain));
         status = libspdm_get_certificate_ex(
             spdm_context, &session_id, slot_id,
+            LIBSPDM_MAX_CERT_CHAIN_SIZE,
             &cert_chain.cert_chain_size,
             cert_chain.cert_chain,
-            NULL, 0);
+            NULL, NULL);
         if (LIBSPDM_STATUS_IS_ERROR(status)) {
             printf("libspdm_get_certificate (slot=%d) - %x\n", slot_id, (uint32_t)status);
             cert_chain.cert_chain_size = 0;
