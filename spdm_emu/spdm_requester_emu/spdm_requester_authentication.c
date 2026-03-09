@@ -42,14 +42,18 @@ spdm_authentication(void *context, uint8_t *slot_mask,
     uint8_t requester_context[SPDM_REQ_CONTEXT_SIZE] = {
         0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
 
-    if ((m_exe_connection & EXE_CONNECTION_DIGEST) != 0) {
+    if ((m_exe_connection & EXE_CONNECTION_DIGEST) != 0)
+    {
         status = libspdm_get_digest(context, NULL, slot_mask,
                                     total_digest_buffer);
-        if (LIBSPDM_STATUS_IS_ERROR(status)) {
+        if (LIBSPDM_STATUS_IS_ERROR(status))
+        {
             return status;
         }
-        for (index = 1; index < SPDM_MAX_SLOT_COUNT; index++) {
-            if ((*slot_mask & (1 << index)) != 0) {
+        for (index = 1; index < SPDM_MAX_SLOT_COUNT; index++)
+        {
+            if ((*slot_mask & (1 << index)) != 0)
+            {
                 m_other_slot_id = index;
             }
         }
@@ -57,68 +61,57 @@ spdm_authentication(void *context, uint8_t *slot_mask,
 
     cert_chain_buffer_size = *cert_chain_size;
 
-    if ((m_exe_connection & EXE_CONNECTION_CERT) != 0) {
-        if (slot_id != 0xFF) {
-            if (slot_id == 0) {
+    if ((m_exe_connection & EXE_CONNECTION_CERT) != 0)
+    {
+        if (slot_id != 0xFF)
+        {
+            if (slot_id == 0)
+            {
                 status = libspdm_get_certificate(
                     context, NULL, 0, cert_chain_size, cert_chain);
-                if (LIBSPDM_STATUS_IS_ERROR(status)) {
+                if (LIBSPDM_STATUS_IS_ERROR(status))
+                {
                     return status;
                 }
-                if (m_other_slot_id != 0) {
+                if (m_other_slot_id != 0)
+                {
                     *cert_chain_size = cert_chain_buffer_size;
                     libspdm_zero_mem(cert_chain, cert_chain_buffer_size);
                     status = libspdm_get_certificate(
                         context, NULL, m_other_slot_id, cert_chain_size, cert_chain);
-                    if (LIBSPDM_STATUS_IS_ERROR(status)) {
+                    if (LIBSPDM_STATUS_IS_ERROR(status))
+                    {
                         return status;
                     }
                 }
-            } else {
+            }
+            else
+            {
                 status = libspdm_get_certificate(
                     context, NULL, slot_id, cert_chain_size, cert_chain);
-                if (LIBSPDM_STATUS_IS_ERROR(status)) {
+                if (LIBSPDM_STATUS_IS_ERROR(status))
+                {
                     return status;
                 }
             }
         }
     }
 
-    if ((m_exe_connection & EXE_CONNECTION_CHAL) != 0) {
+    if ((m_exe_connection & EXE_CONNECTION_CHAL) != 0)
+    {
         status = libspdm_challenge_ex2(context, NULL, slot_id, requester_context,
                                        measurement_hash_type, measurement_hash,
                                        NULL, NULL, NULL, NULL, NULL, NULL);
-        if (LIBSPDM_STATUS_IS_ERROR(status)) {
+        if (LIBSPDM_STATUS_IS_ERROR(status))
+        {
             return status;
         }
     }
 
-    if ((m_exe_connection & EXE_CONNECTION_DIGEST) != 0) {
-        status = libspdm_get_digest(context, NULL, slot_mask,
-                                    total_digest_buffer);
-        if (LIBSPDM_STATUS_IS_ERROR(status)) {
-            return status;
-        }
-    }
-
-    if ((m_exe_connection & EXE_CONNECTION_CERT) != 0) {
-        if (slot_id != 0xFF) {
-            *cert_chain_size = cert_chain_buffer_size;
-            status = libspdm_get_certificate(
-                context, NULL, slot_id, cert_chain_size, cert_chain);
-            if (LIBSPDM_STATUS_IS_ERROR(status)) {
-                return status;
-            }
-        }
-    }
-
-    if ((m_exe_connection & EXE_CONNECTION_DIGEST) != 0) {
-        status = libspdm_get_digest(context, NULL, slot_mask,
-                                    total_digest_buffer);
-        if (LIBSPDM_STATUS_IS_ERROR(status)) {
-            return status;
-        }
-    }
+    /* Post-CHALLENGE re-fetches removed — cert chain is already cached
+     * in the SPDM context from the pre-CHALLENGE GET_DIGESTS/GET_CERTIFICATE
+     * above. The original spdm-emu test code re-fetched them as a conformance
+     * check, but for attestation we only need the single fetch. */
 
     return LIBSPDM_STATUS_SUCCESS;
 }
@@ -149,9 +142,11 @@ libspdm_return_t do_authentication_via_spdm(void)
                                  &cert_chain_size, cert_chain,
                                  m_use_measurement_summary_hash_type,
                                  measurement_hash);
-    if (LIBSPDM_STATUS_IS_ERROR(status)) {
+    if (LIBSPDM_STATUS_IS_ERROR(status))
+    {
         return status;
     }
+    write_certificate_chain_to_file(cert_chain, cert_chain_size, m_use_slot_id);
     return LIBSPDM_STATUS_SUCCESS;
 }
 

@@ -28,4 +28,6 @@
 
 extern uint8_t m_other_slot_id;
 
+void write_certificate_chain_to_file(uint8_t *cert_chain_buffer, size_t cert_chain_size, uint8_t slot_id);
+
 #endif
